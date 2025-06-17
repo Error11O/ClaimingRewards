@@ -1,0 +1,10 @@
+name: ClaimingRewards
+version: '1.0'
+main: dev.error110.claimingRewards.ClaimingRewards
+author: Error110
+description: A simple rewards plugin for having the top claims in the towny Universe.
+api-version: '1.21'
+commands:
+  townyRewards:
+    usage: /<command> <subcommand>
+    description: command to claim your rewards

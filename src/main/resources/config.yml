@@ -1,0 +1,26 @@
+#this is the count of how many towns are rewarded only 1st 2nd and 3rd get extra remainder gets default
+
+towns-rewarded-count: 5
+
+#total of the custom item given
+
+first-total-given: 8
+
+second-total-given: 6
+
+third-total-given: 4
+
+default=total-given: 2
+
+#item:
+#  - SpigotMC API Material https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+#  - the name for the plugin | Color codes. https://htmlcolorcodes.com/minecraft-color-codes/ [60 char limit including white spaces]
+#  - 1st lore line [60 char limit including white spaces]
+#  - 2nd lore line [60 char limit including white spaces]
+#  - etc...
+
+item:
+  - PHANTOM_MEMBRANE
+  - §2Crafting Item
+  - §4Given to the Biggest towns on the server.
+  - §6Thank you claiming on the server <3.
