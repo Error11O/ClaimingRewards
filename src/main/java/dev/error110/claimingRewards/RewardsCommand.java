@@ -15,7 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RewardsCommand extends BaseCommand implements TabExecutor {
 
@@ -29,19 +28,28 @@ public class RewardsCommand extends BaseCommand implements TabExecutor {
         return List.of("claim", "list");
     }
 
+    @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        //checks if the sender is a player and has permission to use the command
+        // checks if the sender is a player and has permission to use the command
         if (sender instanceof Player player) {
             if (!player.hasPermission("claimingrewards.collectrewards")) {
-                sender.sendMessage("You do not have permission to use this command");
+                sender.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 return true;
             }
-            //checks if the command is valid
+            // Check that at least one argument is provided
+            if (args.length <= 0) {
+                sender.sendMessage(ChatColor.RED + "Please specify a subcommand (claim or list).");
+                return true;
+            }
+            // checks if the command is valid
             switch (args[0].toLowerCase()) {
                 case "claim": {
                     ClaimingRewards plugin = ClaimingRewards.getInstance();
                     Town town = TownyAPI.getInstance().getTown(player);
-                    if (town == null) return true;
+                    if (town == null) {
+                        sender.sendMessage(ChatColor.RED + "You are not in a town.");
+                        return true;
+                    }
 
                     Map<UUID, Integer> allTownRewards = plugin.getAllTownRewards();
                     int rewards = 0;
@@ -56,22 +64,23 @@ public class RewardsCommand extends BaseCommand implements TabExecutor {
                     plugin.removeRewardForTown(town);
                     return true;
                 }
-                //uses same sorting as newdaylistener then shows the leaderboard msg
                 case "list": {
                     ClaimingRewards plugin = ClaimingRewards.getInstance();
-                    List<Map.Entry<Town, Integer>> sortedTowns = TownyAPI.getInstance().getTowns().stream()
-                            .collect(Collectors.toMap(
-                                    town -> town,
-                                    Town::getNumTownBlocks,
-                                    (a, b) -> b,
-                                    LinkedHashMap::new))
-                            .entrySet().stream()
-                            .sorted(Map.Entry.<Town, Integer>comparingByValue().reversed())
-                            .toList();
-                    sender.sendMessage(ChatColor.DARK_AQUA + "Rewards Leaderboard:");
+                    List<Map.Entry<Town, Integer>> sortedTowns = plugin.SortTownToClaimsList();
+
+                    sender.sendMessage(ChatColor.YELLOW + "oOo_______[" + ChatColor.GOLD + " Claim Rewards Leaderboard " + ChatColor.YELLOW + "]_______oOo");
+                    sender.sendMessage(ChatColor.DARK_AQUA + "Towns Eligible For Rewards:");
                     for (int i = 0; i < Math.min(sortedTowns.size(), plugin.getConfig().getInt("towns-rewarded-count")); i++) {
                         Map.Entry<Town, Integer> entry = sortedTowns.get(i);
-                        sender.sendMessage(ChatColor.AQUA + entry.getKey().getName() + ChatColor.DARK_GRAY + " - " + ChatColor.AQUA + "(" + entry.getValue() + ")");
+
+                        String rewardKey = switch (i) {
+                            case 0 -> "first-total-given";
+                            case 1 -> "second-total-given";
+                            case 2 -> "third-total-given";
+                            default -> "default-total-given";
+                        };
+                        //done
+                        sender.sendMessage(ChatColor.AQUA + entry.getKey().getName() + ChatColor.AQUA + " (" + entry.getValue() + " Claims" + ")" + ChatColor.DARK_GRAY + " - " + ChatColor.GOLD + plugin.getConfig().getInt(rewardKey) + " Rewards/Day");
                     }
                     return true;
                 }
@@ -83,6 +92,7 @@ public class RewardsCommand extends BaseCommand implements TabExecutor {
         }
         return true;
     }
+
     //gives the player the item from the config
     private void giveReward(Player player, int amount) {
         ClaimingRewards plugin = ClaimingRewards.getInstance();

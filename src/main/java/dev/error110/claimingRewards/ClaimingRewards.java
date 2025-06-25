@@ -2,14 +2,14 @@ package dev.error110.claimingRewards;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public final class ClaimingRewards extends JavaPlugin {
     private final File rewardsFile = new File(getDataFolder(), "town_rewards.json");
@@ -78,5 +78,7 @@ public final class ClaimingRewards extends JavaPlugin {
         return new HashMap<>(townToRewards);
     }
 
-
+    public List<Map.Entry<Town, Integer>> SortTownToClaimsList() {
+        return TownyAPI.getInstance().getTowns().stream().collect(Collectors.toMap(town -> town, Town::getNumTownBlocks, (a, b) -> b, LinkedHashMap::new)).entrySet().stream().sorted(Map.Entry.<Town, Integer>comparingByValue().reversed()).toList();
+    }
 }
